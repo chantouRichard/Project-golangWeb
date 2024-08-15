@@ -236,7 +236,7 @@
     "type": "message",
     "room_id": "movie-1",
     "username": "user1",
-    "content": "This is an awesome scene!"
+    "content": "66666666666"
   }
   ```
 
@@ -249,7 +249,7 @@
     "type": "message",
     "room_id": "movie-1",
     "username": "user2",
-    "content": "Totally agree!"
+    "content": "666666666666"
   }
   ```
 
