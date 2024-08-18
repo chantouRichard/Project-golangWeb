@@ -56,9 +56,9 @@ const login = async () => {
   //调用后台接口，完成登录
   let result = await userLoginService(registerData.value);
   // alert(result.msg ? result.msg : '登录成功');
-  ElMessage.success(result.msg ? result.msg : "登录成功");
+  ElMessage.success(result.message ? result.message : "登录成功");
   //把得到的token存入pinia
-  tokenStore.setToken(result.data);
+  tokenStore.setToken(result.token);
   //跳转页面
   router.push("/");
 };

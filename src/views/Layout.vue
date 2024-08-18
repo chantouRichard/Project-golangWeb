@@ -1,7 +1,7 @@
 <template>
   <el-container class="layout">
     <!-- Header -->
-    <el-header class="header">
+    <el-header class="header" style="position: relative">
       <div class="logo">MovieStream</div>
       <!-- <el-menu
         mode="horizontal"
@@ -16,40 +16,34 @@
       </el-menu> -->
     </el-header>
 
-    <!-- Sidebar & Main Content -->
+    <!-- 左侧菜单 -->
     <el-container>
       <el-aside width="200px" class="sidebar">
         <el-menu
+          style="position: fixed; width: 200px"
           class="el-menu-vertical-demo"
+          router
         >
-          <el-menu-item index="1">首页</el-menu-item>
-          <el-menu-item index="2">热门电影</el-menu-item>
-          <el-menu-item index="3">Favorites</el-menu-item>
-          <el-menu-item index="4">Settings</el-menu-item>
-          <el-sub-menu index="5" title="个人">
+          <el-menu-item index="/api/movies/main">首页</el-menu-item>
+          <el-menu-item index="/api/movieHot">热门电影</el-menu-item>
+          <el-menu-item index="/api/movies">电影分类</el-menu-item>
+          <el-sub-menu index="4" title="个人">
             <template #title>
-                <span style="color: #000000;">个人中心</span>
+              <span style="color: #000000">个人中心</span>
             </template>
-            <el-menu-item index="6">
-                个人资料
-            </el-menu-item>
-            <el-menu-item index="7">
-                我的收藏
-            </el-menu-item>
-            <el-menu-item index="8">
-                观看记录
-            </el-menu-item>
-        </el-sub-menu>
+            <el-menu-item index="/api/userCenter"> 个人资料 </el-menu-item>
+            <el-menu-item index="/api/userFavorite"> 我的收藏 </el-menu-item>
+            <el-menu-item index="/api/userHistory"> 观看记录 </el-menu-item>
+          </el-sub-menu>
+          <el-menu-item index="/api/movieRoom"> 我的房间 </el-menu-item>
         </el-menu>
       </el-aside>
 
+      <!-- 中间区域 -->
       <el-main class="main-content">
-        <div class="content-header">Welcome to MovieStream</div>
+        <!-- <div class="content-header">Welcome to MovieStream</div> -->
         <div class="content-body">
-          <p>
-            Here you can stream the latest movies and series. Enjoy the best
-            experience with our platform!
-          </p>
+          <router-view></router-view>
           <!-- Add your dynamic content here -->
         </div>
       </el-main>

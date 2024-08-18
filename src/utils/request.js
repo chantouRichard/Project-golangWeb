@@ -49,7 +49,7 @@ instance.interceptors.response.use(
         if(err.response&&err.response.status===401){
             //没有权限,跳转到登录页
             ElMessage.error('没有权限,请登录');
-            router.push('/login')
+            router.push('/api/register')
         }
         else ElMessage.error('服务异常');
         return Promise.reject(err);//异步的状态转化成失败的状态
