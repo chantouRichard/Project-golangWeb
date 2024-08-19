@@ -45,3 +45,8 @@ export const enterRoomService = (roomID) => {
 export const exitRoomService = () => {
     return request.post('/api/rooms/leave');
 }
+
+//播放视频
+export const playVideoService = (roomID) => {
+    return request.get(`/api/rooms/${roomID}/stream`)
+}

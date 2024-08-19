@@ -7,6 +7,10 @@ const currentPage = ref(1); // 当前页
 const pageSize = ref(3); // 每页显示的条数
 const total = ref(0); // 总记录数
 
+const selectedMovie = ref(null);
+const rooms = ref([]);
+const showMovieDetails = ref(false);
+
 // 通过 rowStyle 函数为每一行设置自定义样式
 const rowStyle = () => {
   return {
@@ -89,6 +93,51 @@ const clearFetch = () => {
   fetchMovies();
 };
 
+import { movieDetailService } from "@/api/movie";
+const fetchMovieDetails = async (movieId) => {
+  const response = await movieDetailService(movieId);
+  if (response.status === "success") {
+    selectedMovie.value = response.movie;
+  } else {
+    ElMessage.error("无法获取电影详情");
+    selectedMovie.value = null;
+  }
+};
+
+import { movieRoomListService } from "@/api/movie";
+const fetchRoomDetails = async (movieId) => {
+  try {
+    let response = await movieRoomListService(movieId);
+    if (response.status === "success") {
+      rooms.value = response.rooms;
+    } else {
+      ElMessage.error("无法获取房间列表");
+    }
+  } catch (error) {
+    ElMessage.error("无法获取房间列表");
+  }
+};
+
+//进入房间
+import {enterRoomService} from "@/api/movie";
+const openRoom = async (roomId) => {
+  let response = await enterRoomService(roomId);
+  if (response.status === "success") {
+    ElMessage.success("进入房间成功");
+  } else {
+    ElMessage.error("进入房间失败");
+  }
+};
+const openMovieDrawer = async (movieId) => {
+  await fetchMovieDetails(movieId);
+  await fetchRoomDetails(movieId);
+  showMovieDetails.value = true;
+};
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleString();
+};
 
 </script>
 
@@ -132,8 +181,9 @@ const clearFetch = () => {
       style="width: 100%; height: inherit"
       :row-style="rowStyle"
       :row-class-name="rowClassName"
+      @click="openMovieDrawer(1)"
     >
-      <el-table-column label="序号" width="100" type="index"> </el-table-column>
+      <el-table-column label="序号" width="100" type="index" > </el-table-column>
       <el-table-column label="电影名称" prop="title"></el-table-column>
       <el-table-column label="电影图片" prop="video_url"></el-table-column>
       <el-table-column label="分类名称" prop="genre"></el-table-column>
@@ -152,6 +202,37 @@ const clearFetch = () => {
       :page-sizes="[3, 5, 10, 20]"
       style="text-align: right; margin-top: 20px"
     ></el-pagination>
+    <!-- 抽屉 -->
+    <el-drawer
+        v-model="showMovieDetails"
+        title="电影详情"
+        direction="rtl"
+        size="50%"
+      >
+        <div v-if="selectedMovie">
+          <h2>{{ selectedMovie.title }}</h2>
+          <h3>导演: {{ selectedMovie.director }}</h3>
+          <h3>上映时间: {{ formatDate(selectedMovie.updatedAt) }}</h3>
+          <h3>描述: {{ selectedMovie.description }}</h3>
+
+          <!-- Room List -->
+          <h3>相关房间:</h3>
+          <ul v-if="rooms">
+            <li v-for="(room, index) in rooms" :key="index">
+              <h3>
+                房间名: {{ room.room_name }} - 创建者: {{ room.creator.name }} -
+              </h3>
+              <h3>创建时间: {{ formatDate(room.created_at) }}</h3>
+              <el-button type="primary" @click="openRoom(room.id)"
+                >进入房间</el-button
+              >
+            </li>
+          </ul>
+          <el-empty v-else description="暂无相关房间"></el-empty>
+        </div>
+        <el-empty v-else description="暂无电影详情"></el-empty>
+      </el-drawer>
+
   </div>
 </template>
 
