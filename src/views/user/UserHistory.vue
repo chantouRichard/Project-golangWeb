@@ -5,6 +5,7 @@
     </el-header>
 
     <el-main v-if="histories.length > 0">
+      <el-button type="primary" @click="deleteHistory">删除所有历史记录</el-button>
       <el-row :gutter="20">
         <el-col :span="8" v-for="(history, index) in histories" :key="index">
           <el-card
@@ -42,9 +43,13 @@
         <h3>相关房间:</h3>
         <ul v-if="rooms">
           <li v-for="(room, index) in rooms" :key="index">
-            <h3>房间名: {{ room.room_name }} - 创建者: {{ room.creator.name }} -</h3>
+            <h3>
+              房间名: {{ room.room_name }} - 创建者: {{ room.creator.name }} -
+            </h3>
             <h3>创建时间: {{ formatDate(room.created_at) }}</h3>
-            <el-button type="primary" @click="openRoom(room.id)">进入房间</el-button>
+            <el-button type="primary" @click="openRoom(room.id)"
+              >进入房间</el-button
+            >
           </li>
         </ul>
         <el-empty v-else description="暂无相关房间"></el-empty>
@@ -100,7 +105,7 @@ const fetchRoomDetails = async (movieId) => {
 };
 
 //进入房间
-import {enterRoomService} from "@/api/movie";
+import { enterRoomService } from "@/api/movie";
 const openRoom = async (roomId) => {
   let response = await enterRoomService(roomId);
   if (response.status === "success") {
@@ -118,6 +123,34 @@ const openMovieDrawer = async (movieId) => {
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleString();
+};
+
+//删除观看历史
+import { deleteHistoryService } from "@/api/user";
+import { ElMessageBox } from "element-plus";
+const deleteHistory = async () => {
+  //提示是否删除
+
+  ElMessageBox.confirm("是否删除所有历史记录？", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      //调用删除接口函数
+      let response = await deleteHistoryService();
+      await fetchHistories();
+      ElMessage({
+        type: "success",
+        message: "删除成功！",
+      });
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "已取消删除！",
+      });
+    });
 };
 
 onMounted(() => {

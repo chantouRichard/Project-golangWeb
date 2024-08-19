@@ -10,6 +10,7 @@ const total = ref(0); // 总记录数
 const selectedMovie = ref(null);
 const rooms = ref([]);
 const showMovieDetails = ref(false);
+const isDialogVisible = ref(false);
 
 // 通过 rowStyle 函数为每一行设置自定义样式
 const rowStyle = () => {
@@ -48,7 +49,6 @@ const fetchMovies = async () => {
     total.value = 0;
   }
 };
-
 
 //声明一个异步的函数
 import { movieCategoryListService } from "@/api/movie.js";
@@ -119,7 +119,8 @@ const fetchRoomDetails = async (movieId) => {
 };
 
 //进入房间
-import {enterRoomService} from "@/api/movie";
+import { enterRoomService } from "@/api/movie";
+import { addHistoryService } from "@/api/movie";
 const openRoom = async (roomId) => {
   let response = await enterRoomService(roomId);
   if (response.status === "success") {
@@ -128,9 +129,19 @@ const openRoom = async (roomId) => {
     ElMessage.error("进入房间失败");
   }
 };
-const openMovieDrawer = async (movieId) => {
-  await fetchMovieDetails(movieId);
-  await fetchRoomDetails(movieId);
+
+// 添加历史记录
+const addHistory = async (movieId) => {
+  let response = await addHistoryService(movieId);
+  if (response.status === "success") {
+    ElMessage.success("添加历史记录成功");
+  }
+};
+const openMovieDrawer = async (row) => {
+  console.log("row:", row);
+  ElMessage.success(row.ID);
+  await fetchMovieDetails(row.ID);
+  await fetchRoomDetails(row.ID);
   showMovieDetails.value = true;
 };
 
@@ -139,6 +150,44 @@ const formatDate = (dateString) => {
   return date.toLocaleString();
 };
 
+//创建房间
+const roomName = ref("");
+// 打开弹窗
+const showCreateRoomDialog = () => {
+  isDialogVisible.value = true;
+  ElMessage.success("打开弹窗:" + isDialogVisible.value);
+};
+// 提交房间创建请求
+import { createRoomService } from "@/api/movie";
+const submitCreateRoom = async () => {
+  if (!roomName.value.trim()) {
+    ElMessage.error("房间名称不能为空");
+    return;
+  }
+
+  const movieID = selectedMovie.value.ID;
+
+  // 构造请求数据
+  const requestData = {
+    movie_id: movieID,
+    room_name: roomName.value.trim(),
+  };
+
+  let response = await createRoomService(requestData);
+
+  if (response.status === "success") {
+    ElMessage.success("创建房间成功");
+    isDialogVisible.value = false; // 关闭弹窗
+    await fetchRoomDetails(movieID); // 获取房间详情
+  } else {
+    ElMessage.error("创建房间失败");
+  }
+};
+
+//获取电影封面图片
+const getImageUrl = (movieID) => {
+  return `http://localhost:8080/api/movies/picture/${movieID}`;
+};
 </script>
 
 <template>
@@ -181,13 +230,30 @@ const formatDate = (dateString) => {
       style="width: 100%; height: inherit"
       :row-style="rowStyle"
       :row-class-name="rowClassName"
-      @click="openMovieDrawer(1)"
     >
-      <el-table-column label="序号" width="100" type="index" > </el-table-column>
+      <el-table-column label="序号" width="100" type="index"> </el-table-column>
       <el-table-column label="电影名称" prop="title"></el-table-column>
-      <el-table-column label="电影图片" prop="video_url"></el-table-column>
+      <!-- 电影图片列 -->
+      <el-table-column label="电影图片">
+        <template #default="{ row }">
+          <img
+            :src="getImageUrl(row.ID)"
+            alt="电影图片"
+            style="width: auto; height: 150px"
+          />
+        </template>
+      </el-table-column>
       <el-table-column label="分类名称" prop="genre"></el-table-column>
       <el-table-column label="评分" prop="rating"></el-table-column>
+      <el-table-column label="电影详情" width="100%">
+        <template #default="{ row }">
+          <el-button
+            plain
+            type="warning"
+            @click="openMovieDrawer(row)"
+          ></el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <!-- 添加分页控件 -->
@@ -204,39 +270,69 @@ const formatDate = (dateString) => {
     ></el-pagination>
     <!-- 抽屉 -->
     <el-drawer
-        v-model="showMovieDetails"
-        title="电影详情"
-        direction="rtl"
-        size="50%"
-      >
-        <div v-if="selectedMovie">
-          <h2>{{ selectedMovie.title }}</h2>
-          <h3>导演: {{ selectedMovie.director }}</h3>
-          <h3>上映时间: {{ formatDate(selectedMovie.updatedAt) }}</h3>
-          <h3>描述: {{ selectedMovie.description }}</h3>
+      v-model="showMovieDetails"
+      title="电影详情"
+      direction="rtl"
+      size="50%"
+    >
+      <div v-if="selectedMovie">
+        <h2>{{ selectedMovie.title }}</h2>
+        <h3>导演: {{ selectedMovie.director }}</h3>
+        <h3>上映时间: {{ formatDate(selectedMovie.updatedAt) }}</h3>
+        <h3>描述: {{ selectedMovie.description }}</h3>
 
-          <!-- Room List -->
-          <h3>相关房间:</h3>
-          <ul v-if="rooms">
-            <li v-for="(room, index) in rooms" :key="index">
-              <h3>
-                房间名: {{ room.room_name }} - 创建者: {{ room.creator.name }} -
-              </h3>
-              <h3>创建时间: {{ formatDate(room.created_at) }}</h3>
-              <el-button type="primary" @click="openRoom(room.id)"
-                >进入房间</el-button
-              >
-            </li>
-          </ul>
-          <el-empty v-else description="暂无相关房间"></el-empty>
-        </div>
-        <el-empty v-else description="暂无电影详情"></el-empty>
-      </el-drawer>
+        <!-- Room List -->
+        <h3>相关房间:</h3>
+        <ul v-if="rooms">
+          <li v-for="(room, index) in rooms" :key="index">
+            <h3>
+              房间名: {{ room.room_name }} - 创建者: {{ room.creator.name }} -
+            </h3>
+            <h3>创建时间: {{ formatDate(room.created_at) }}</h3>
+            <el-button
+              type="primary"
+              @click="
+                openRoom(room.id);
+                addHistory(room.movie_id);
+              "
+              >进入房间</el-button
+            >
+          </li>
+        </ul>
+        <el-empty v-else description="暂无相关房间"></el-empty>
+        <el-button type="primary" @click="showCreateRoomDialog"
+          >创建我的房间</el-button
+        >
+      </div>
+      <el-empty v-else description="暂无电影详情"></el-empty>
+    </el-drawer>
 
+    <!-- 弹窗 -->
+    <el-dialog title="创建房间" v-model="isDialogVisible" width="30%">
+      <el-input v-model="roomName" placeholder="请输入房间名称"></el-input>
+
+      <span class="dialog-footer">
+        <el-button @click="isDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitCreateRoom">创建</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <style scoped>
+h2 {
+  margin: 0;
+  padding: 10px 0;
+  color: #409eff;
+  font-weight: bold;
+}
+
+h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  color: #333;
+}
+
 .custom-row {
   background-color: #000000; /* 更改背景色 */
   height: 60px; /* 更改行高 */

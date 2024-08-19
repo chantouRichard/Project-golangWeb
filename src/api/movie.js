@@ -50,3 +50,31 @@ export const exitRoomService = () => {
 export const playVideoService = (roomID) => {
     return request.get(`/api/rooms/${roomID}/stream`)
 }
+
+//创建房间
+export const createRoomService = (params) => {
+    return request.post('/api/rooms', params);
+}
+
+//删除房间
+export const closeRoomService = (roomID) => {
+    return request.delete(`/api/rooms/${roomID}`)
+}
+
+//加入收藏
+export const addCollectionService = (movieID) => {
+    return request.post('/api/movies/collections',{params:{movie_id: movieID}})
+}
+
+//添加历史记录
+export const addHistoryService = (movieID) => {
+    const params = {
+        movie_id: movieID,  // 修改这里的键名
+    };
+    return request.post('/api/user/history',params);
+}
+
+//搜索电影
+export const searchMovieService = (params) =>{
+    return request.get('/api/movies/search',{params:params})
+}

@@ -45,7 +45,7 @@ const fetchRoomDetails = async (movieId) => {
 };
 
 //进入房间
-import {enterRoomService} from "@/api/movie";
+import { enterRoomService } from "@/api/movie";
 const openRoom = async (roomId) => {
   let response = await enterRoomService(roomId);
   if (response.status === "success") {
@@ -63,6 +63,16 @@ const openMovieDrawer = async (movieId) => {
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleString();
+};
+
+//取消收藏
+import { deleteCollectionService } from "@/api/user";
+const deCollection = async (id) => {
+  let response = await deleteCollectionService(id);
+  if (response.status === "success") {
+    ElMessage.success("取消收藏成功");
+    fetchCollections();
+  }
 };
 
 onMounted(() => {
@@ -83,13 +93,17 @@ onMounted(() => {
           v-for="(collection, index) in collections"
           :key="index"
         >
-          <el-card :body-style="{ padding: '20px' }" @click="openMovieDrawer(collection.Movie.ID)">
+          <el-card
+            :body-style="{ padding: '20px' }"
+            @click="openMovieDrawer(collection.Movie.ID)"
+          >
             <div>
               <h3>{{ collection.Movie.title }}</h3>
               <p>导演: {{ collection.Movie.director }}</p>
               <p>上映时间: {{ collection.Movie.CreatedAt }}</p>
               <p>{{ collection.Movie.description }}</p>
             </div>
+            <el-button type="primary" @click="deCollection(collection.ID)">取消收藏</el-button>
           </el-card>
         </el-col>
       </el-row>

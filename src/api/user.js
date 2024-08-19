@@ -50,6 +50,11 @@ export const fetchHistoryService = () => {
 }
 
 //删除收藏
-export const deleteCollection = (id) => {
+export const deleteCollectionService = (id) => {
     return request.delete(`/api/user/collections/${id}`);
+}
+
+//删除观看记录
+export const deleteHistoryService = () => {
+    return request.delete('/api/user/history');
 }
