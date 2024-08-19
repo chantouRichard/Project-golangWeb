@@ -53,6 +53,13 @@ func SetRoomRoutes(r *gin.Engine, db *gorm.DB) {
 
 			creatorID := uint(userID) // 自定义CreatorID，这里假设为123
 
+			// 检查用户是否已经加入了其他房间
+			var existingUserRoom models.UserRoom
+			if err := db.Where("user_id = ?", userID).First(&existingUserRoom).Error; err == nil {
+				c.JSON(http.StatusConflict, gin.H{"status": "error", "message": "User is already in another room"})
+				return
+			}
+
 			// 检查用户是否已经创建了房间
 			var existingRoom models.Room
 			if err := db.Where("creator_id = ?", creatorID).First(&existingRoom).Error; err == nil {
@@ -69,6 +76,16 @@ func SetRoomRoutes(r *gin.Engine, db *gorm.DB) {
 			}
 
 			if err := db.Create(&room).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
+				return
+			}
+
+			userRoom := models.UserRoom{
+				UserID: creatorID,
+				RoomID: room.ID,
+			}
+
+			if err := db.Create(&userRoom).Error; err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 				return
 			}
@@ -214,41 +231,41 @@ func SetRoomRoutes(r *gin.Engine, db *gorm.DB) {
 		// 关闭房间
 		rooms.DELETE("/:room_id", func(c *gin.Context) {
 			// 从 Authorization 头中提取 Token
-			tokenStr := c.GetHeader("Authorization")
-			if tokenStr == "" {
-				c.JSON(http.StatusUnauthorized, gin.H{"status": "error", "message": "Token is required"})
-				return
-			}
-
-			// 去掉 'Bearer ' 前缀
-			tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
-
-			// 解析 Token 并获取用户 ID
-			token, claims, err := parseToken(tokenStr)
-			if err != nil || !token.Valid {
-				c.JSON(http.StatusUnauthorized, gin.H{"status": "error", "message": "Invalid token"})
-				return
-			}
-
-			// 获取用户 ID，假设 claims.Id 是字符串，需要转换成 uint 类型
-			userID, err := strconv.ParseUint(claims.Id, 10, 32)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to parse user ID"})
-				return
-			}
-
-			// 定义请求体结构体
-			var req struct {
-				UserID uint `json:"user_id"`
-			}
-
-			// 将解析到的 userID 赋值给 req.UserID
-			req.UserID = uint(userID)
-
-			if err := c.BindJSON(&req); err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
-				return
-			}
+			//tokenStr := c.GetHeader("Authorization")
+			//if tokenStr == "" {
+			//	c.JSON(http.StatusUnauthorized, gin.H{"status": "error", "message": "Token is required"})
+			//	return
+			//}
+			//
+			//// 去掉 'Bearer ' 前缀
+			//tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
+			//
+			//// 解析 Token 并获取用户 ID
+			//token, claims, err := parseToken(tokenStr)
+			//if err != nil || !token.Valid {
+			//	c.JSON(http.StatusUnauthorized, gin.H{"status": "error", "message": "Invalid token"})
+			//	return
+			//}
+			//
+			//// 获取用户 ID，假设 claims.Id 是字符串，需要转换成 uint 类型
+			//userID, err := strconv.ParseUint(claims.Id, 10, 32)
+			//if err != nil {
+			//	c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to parse user ID"})
+			//	return
+			//}
+			//
+			//// 定义请求体结构体
+			//var req struct {
+			//	UserID uint `json:"user_id"`
+			//}
+			//
+			//// 将解析到的 userID 赋值给 req.UserID
+			//req.UserID = uint(userID)
+			//
+			//if err := c.BindJSON(&req); err != nil {
+			//	c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
+			//	return
+			//}
 
 			roomID := c.Param("room_id")
 

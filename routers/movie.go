@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"Online-Theater/handlers"
 	"Online-Theater/models"
 	middleware "Online-Theater/package"
 	"github.com/gin-gonic/gin"
@@ -56,6 +57,22 @@ func SetMovieRoutes(r *gin.Engine, db *gorm.DB) {
 				return
 			}
 			c.JSON(http.StatusOK, gin.H{"status": "success", "movie": movie})
+		})
+
+		//获取电影封面图片
+		movies.GET("/picture/:id", func(c *gin.Context) {
+			id := c.Param("id")
+
+			// 查询电影记录
+			var movie models.Movie
+			if err := db.Where("id = ?", id).First(&movie).Error; err != nil {
+				c.JSON(http.StatusNotFound, gin.H{"error": "电影未找到"})
+				return
+			}
+
+			// 调用 StreamPicture 处理图片流
+			picturePath := movie.ThumbnailURL // 从电影记录中获取图片路径
+			handlers.StreamPicture(c, picturePath)
 		})
 
 		// 搜索电影
@@ -176,6 +193,27 @@ func SetMovieRoutes(r *gin.Engine, db *gorm.DB) {
 			c.JSON(http.StatusOK, gin.H{"status": "success", "message": "Movie added to collection"})
 		})
 
+		//搜索电影
+		movies.GET("/search", func(c *gin.Context) {
+			query := c.Query("query")
+			mode := c.Query("mode")
+
+			if query == "" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Query parameter is required"})
+				return
+			}
+
+			var movies []models.Movie
+			if mode == "exact" {
+				// 精确搜索
+				db.Where("name = ?", query).Find(&movies)
+			} else {
+				// 模糊搜索
+				db.Where("name LIKE ?", "%"+query+"%").Find(&movies)
+			}
+
+			c.JSON(http.StatusOK, gin.H{"movies": movies})
+		})
 	}
 
 }
