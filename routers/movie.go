@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func SetMovieRoutes(r *gin.Engine, db *gorm.DB) {
@@ -73,21 +74,6 @@ func SetMovieRoutes(r *gin.Engine, db *gorm.DB) {
 			// 调用 StreamPicture 处理图片流
 			picturePath := movie.ThumbnailURL // 从电影记录中获取图片路径
 			handlers.StreamPicture(c, picturePath)
-		})
-
-		// 搜索电影
-		movies.GET("/search", func(c *gin.Context) {
-			query := c.Query("query")
-			var movies []models.Movie
-			if err := db.Where("title LIKE ?", "%"+query+"%").Find(&movies).Error; err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to search movies"})
-				return
-			}
-			if len(movies) == 0 {
-				c.JSON(http.StatusOK, gin.H{"status": "error", "movies": "没有符合条件的电影"})
-			} else {
-				c.JSON(http.StatusOK, gin.H{"status": "success", "movies": movies})
-			}
 		})
 
 		// 筛选电影
@@ -206,13 +192,56 @@ func SetMovieRoutes(r *gin.Engine, db *gorm.DB) {
 			var movies []models.Movie
 			if mode == "exact" {
 				// 精确搜索
-				db.Where("name = ?", query).Find(&movies)
+				db.Where("title = ?", query).Find(&movies)
 			} else {
 				// 模糊搜索
-				db.Where("name LIKE ?", "%"+query+"%").Find(&movies)
+				db.Where("title LIKE ?", "%"+query+"%").Find(&movies)
 			}
 
-			c.JSON(http.StatusOK, gin.H{"movies": movies})
+			c.JSON(http.StatusOK, gin.H{"movies": movies, "status": "success"})
+		})
+
+		//推荐电影
+		movies.GET("/recommend", func(c *gin.Context) {
+			// 从 Authorization 头中提取 Token
+			tokenStr := c.GetHeader("Authorization")
+			if tokenStr == "" {
+				c.JSON(http.StatusUnauthorized, gin.H{"status": "error", "message": "Token is required"})
+				return
+			}
+
+			// 去掉 'Bearer ' 前缀
+			tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
+
+			// 解析 Token 并获取用户 ID
+			token, claims, err := parseToken(tokenStr)
+			if err != nil || !token.Valid {
+				c.JSON(http.StatusUnauthorized, gin.H{"status": "error", "message": "Invalid token"})
+				return
+			}
+
+			// 获取用户 ID，假设 claims.Id 是字符串，需要转换成 uint 类型
+			userID, err := strconv.ParseUint(claims.Id, 10, 32)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to parse user ID"})
+				return
+			}
+			// 将解析到的 userID 赋值给 req.UserID
+
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user_id"})
+				return
+			}
+
+			// 调用推荐算法
+			movies, err := handlers.RecommendMovies(db, int(userID))
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			// 返回JSON格式的推荐电影列表
+			c.JSON(http.StatusOK, gin.H{"movies": movies, "status": "success"})
 		})
 	}
 

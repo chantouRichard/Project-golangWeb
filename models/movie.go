@@ -31,4 +31,5 @@ type Movie struct {
 	DeletedAt    time.Time
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+	Quote        string `json:"quote"`
 }
