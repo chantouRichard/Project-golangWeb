@@ -101,31 +101,31 @@ fetchUserInfo();
 <template>
   <el-container>
     <!-- 个人资料部分 -->
-    <el-card shadow="hover" style="margin: 20px">
+    <el-card shadow="hover" style="margin: 20px;width: 500px;height: 500px;">
       <div class="header">
         <span>个人资料</span>
       </div>
-      <el-form :model="user" ref="userForm" label-width="100px">
-        <el-form-item label="用户名">
+      <el-form :model="user" ref="userForm" label-width="100px" style="margin-top: 50px;">
+        <el-form-item label="用户名" style="margin-top: 50px;">
           <el-input v-model="user.username"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱">
+        <el-form-item label="邮箱" style="margin-top: 50px;">
           <el-input v-model="user.email"></el-input>
         </el-form-item>
-        <el-form-item label="昵称">
+        <el-form-item label="昵称" style="margin-top: 50px;">
           <el-input v-model="user.nickname"></el-input>
         </el-form-item>
-        <el-form-item label="电话">
+        <el-form-item label="电话" style="margin-top: 50px;">
           <el-input v-model="user.phone"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="updateUser">更新资料</el-button>
+          <el-button type="primary" @click="updateUser" style="margin-top: 0px;width: 200px;height: 50px;border-radius: 50px;">更新资料</el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
     <!-- 重置密码部分 -->
-    <el-card shadow="hover" style="margin: 20px">
+    <el-card shadow="hover" style="margin: 20px;width: 500px;height: 500px;">
       <div class="header">
         <span>重置密码</span>
       </div>
@@ -134,8 +134,9 @@ fetchUserInfo();
         :rules="rules"
         label-width="100px"
         size="large"
+        style="margin-top: 50px;"
       >
-        <el-form-item label="原密码" prop="old_pwd">
+        <el-form-item label="原密码" prop="old_pwd"  style="margin-top: 50px;">
           <el-input
             :prefix-icon="Lock"
             type="password"
@@ -143,7 +144,7 @@ fetchUserInfo();
             v-model="passwordModel.old_pwd"
           ></el-input>
         </el-form-item>
-        <el-form-item label="新密码" prop="new_pwd">
+        <el-form-item label="新密码" prop="new_pwd"  style="margin-top: 50px;">
           <el-input
             :prefix-icon="Lock"
             type="password"
@@ -151,7 +152,7 @@ fetchUserInfo();
             v-model="passwordModel.new_pwd"
           ></el-input>
         </el-form-item>
-        <el-form-item label="确认新密码" prop="re_pwd">
+        <el-form-item label="确认新密码" prop="re_pwd"  style="margin-top: 50px;">
           <el-input
             :prefix-icon="Lock"
             type="password"
@@ -160,7 +161,7 @@ fetchUserInfo();
           ></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="updatePassword">提交修改</el-button>
+          <el-button type="primary" @click="updatePassword" style="margin-top: 50px;width: 200px;height: 50px;border-radius: 50px;">提交修改</el-button>
         </el-form-item>
       </el-form>
     </el-card>

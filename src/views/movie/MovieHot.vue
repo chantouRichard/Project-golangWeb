@@ -14,16 +14,14 @@
 
     <el-button type="primary" @click="searchMovies">Search</el-button>
 
-    <el-table :data="movies" style="width: 100%" v-if="movies.length">
+    <el-table :data="movies" style="width: 100%" v-if="movies!=null&&movies.length">
       <el-table-column
         prop="title"
         label="Movie Name"
-        width="180"
       ></el-table-column>
       <el-table-column
-        prop="release_date"
+        prop="created_at"
         label="Release Date"
-        width="180"
       ></el-table-column>
       <el-table-column prop="genre" label="Genre"></el-table-column>
     </el-table>

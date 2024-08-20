@@ -185,7 +185,12 @@ const submitCreateRoom = async () => {
 };
 
 //获取电影封面图片
-const getImageUrl = (movieID) => {
+const getImageUrl = async(movieID) => {
+  // let result = await movieDetailService(movieID);
+  // ElMessage.success(movieID);
+  // console.log("result:", result);
+  // console.log("result.movie.url:", result.movie.thumbnail_url);
+  // return result.movie.thumbnail_url;
   return `http://localhost:8080/api/movies/picture/${movieID}`;
 };
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-menu v-if="room" :default-active="room.RoomID" class="el-menu-vertical">
+    <el-menu v-if="room" :default-active="room.RoomID" mode="horizontal" class="el-menu-vertical">
       <el-menu-item>
         <h3><strong>Room ID:</strong> {{ room.RoomID }}</h3>
       </el-menu-item>
@@ -22,38 +22,40 @@
         >关闭房间</el-button
       >
     </el-menu>
-
-    <!-- 视频播放区域 -->
-    <div v-if="room && videoUrl" class="video-container">
-      <video
-        ref="videoElementRef"
-        controls
-        autoplay
-        :src="videoUrl"
-        class="video-player"
-      ></video>
-    </div>
-    <!-- 聊天框部分 -->
-    <div v-if="room" class="chat-container">
-      <div class="chat-messages" ref="chatMessages">
-        <p v-for="(message, index) in messages" :key="index">
-          {{ message }}
-        </p>
+    <div class="container">
+      <!-- 视频播放区域 -->
+      <div v-if="room && videoUrl" class="video-container">
+        <video
+          ref="videoElementRef"
+          controls
+          autoplay
+          :src="videoUrl"
+          class="video-player"
+        ></video>
       </div>
-      <el-input
-        v-model="newMessage"
-        placeholder="输入消息..."
-        @keyup.enter="sendMessage"
-        class="chat-input"
-      />
-      <el-button type="primary" @click="sendMessage">发送</el-button>
-    </div>
+      <!-- 聊天框部分 -->
+      <div v-if="room" class="chat-container">
+        聊天框
+        <div class="chat-messages" ref="chatMessages">
+          <p v-for="(message, index) in messages" :key="index">
+            {{ message }}
+          </p>
+        </div>
+        <el-input
+          v-model="newMessage"
+          placeholder="输入消息..."
+          @keyup.enter="sendMessage"
+          class="chat-input"
+        />
+        <el-button type="primary" @click="sendMessage">发送</el-button>
+      </div>
 
-    <el-empty
-      v-else-if="!loading && !room"
-      description="No Room Info Available"
-    ></el-empty>
-    <el-spinner v-else></el-spinner>
+      <el-empty
+        v-else-if="!loading && !room"
+        description="No Room Info Available"
+      ></el-empty>
+      <el-spinner v-else></el-spinner>
+    </div>
   </div>
 </template>
 
@@ -344,7 +346,7 @@ getUserInfo();
 
 <style scoped>
 .el-menu-vertical {
-  width: 300px;
+  width: 1000px;
   background-color: #f5f5f5;
   border-radius: 8px;
   padding: 10px;
@@ -355,9 +357,9 @@ getUserInfo();
 }
 
 .video-player {
-  width: 100%;
-  max-width: 1000px;
-  height: auto;
+  width: auto;
+  max-width: 1500px;
+  height: 600px;
 }
 
 .screen {
@@ -375,11 +377,12 @@ getUserInfo();
   padding: 10px;
   border-radius: 8px;
   width: 100%;
-  max-width: 500px;
+  max-width: 300px;
+  height: 600px;
 }
 
 .chat-messages {
-  height: 200px;
+  height: 500px;
   overflow-y: auto;
   border: 1px solid #000000;
   padding: 10px;
@@ -392,5 +395,11 @@ getUserInfo();
 .chat-input {
   width: calc(100% - 100px);
   margin-right: 10px;
+}
+
+.container {
+  display: flex;
+  /* Adjust the alignment and spacing as needed */
+  gap: 20px; /* Optional: Adjust the space between the video and chat box */
 }
 </style>

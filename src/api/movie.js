@@ -78,3 +78,13 @@ export const addHistoryService = (movieID) => {
 export const searchMovieService = (params) =>{
     return request.get('/api/movies/search',{params:params})
 }
+
+//电影推荐
+export const movieRecommendService = () =>{
+    return request.get('/api/movies/recommend')
+}
+
+// //获取电影封面图片
+// export const movieCoverService = (movieID) =>{
+//     return request.get(`/api/movies/picture/${movieID}`)
+// }

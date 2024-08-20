@@ -1,3 +1,39 @@
+<script setup>
+import { ElMessage, ElMessageBox } from "element-plus";
+import { useTokenStore } from "@/stores/token.js";
+import { useUserInfoStore } from "@/stores/userInfo.js";
+import { useRouter } from "vue-router";
+const userInfoStore = useUserInfoStore();
+const tokenStore = useTokenStore();
+const router = useRouter();
+const exitLogin = async () => {
+  useTokenStore.removeItem;
+  ElMessageBox.confirm("您确认要退出登录吗？", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  })
+    .then(async () => {
+      //调用退出登录接口
+      //1、清空pinia中的用户信息和token
+      tokenStore.removeToken();
+      userInfoStore.removeInfo();
+      //2、跳转到登录页面
+      router.push("/api/register");
+      ElMessage({
+        type: "success",
+        message: "退出登录成功！",
+      });
+    })
+    .catch(() => {
+      ElMessage({
+        type: "info",
+        message: "已取消退出登录！",
+      });
+    });
+};
+</script>
+
 <template>
   <el-container class="layout">
     <!-- Header -->
@@ -34,8 +70,10 @@
             <el-menu-item index="/api/userCenter"> 个人资料 </el-menu-item>
             <el-menu-item index="/api/userFavorite"> 我的收藏 </el-menu-item>
             <el-menu-item index="/api/userHistory"> 观看记录 </el-menu-item>
+            <el-menu-item @click="exitLogin"> 退出登录 </el-menu-item>
           </el-sub-menu>
           <el-menu-item index="/api/movieRoom"> 我的房间 </el-menu-item>
+          <el-menu-item index="/"> 联系我们 </el-menu-item>
         </el-menu>
       </el-aside>
 

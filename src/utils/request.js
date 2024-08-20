@@ -40,9 +40,9 @@ instance.interceptors.response.use(
 
         //业务状态码不等于0,则提示错误信息
         // alert(result.data.msg?result.data.msg:"服务异常");
-        ElMessage.error(result.data.msg ?result.data.msg:"服务异常");
+        ElMessage.error(result.data.msg ?result.data.msg:"服务异常11");
         //异步操作的状态转化成失败的状态
-        return Promise.reject(result.data);
+        return Promise.reject(result.data)+"666异步失败啦啦啦";
     },
     err=>{
         //判断响应状态码，如果响应状态码为401,则跳转到登录页
@@ -51,8 +51,8 @@ instance.interceptors.response.use(
             ElMessage.error('没有权限,请登录');
             router.push('/api/register')
         }
-        else ElMessage.error('服务异常');
-        return Promise.reject(err);//异步的状态转化成失败的状态
+        else ElMessage.error('服务异常22'+err.response.status);
+        return Promise.reject(err)+"401失败啦啦啦";//异步的状态转化成失败的状态
     }
 )
 

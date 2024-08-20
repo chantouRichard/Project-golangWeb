@@ -127,7 +127,7 @@ const clearData = () => {
           </el-button>
         </el-form-item>
         <el-form-item class="flex">
-          <el-link type="info" :underline="false" @click="isRegister = false;clearData()">
+          <el-link style="color: black;" type="info" :underline="false" @click="isRegister = false;clearData()">
             ← 返回
           </el-link>
         </el-form-item>
@@ -173,7 +173,7 @@ const clearData = () => {
           >
         </el-form-item>
         <el-form-item class="flex">
-          <el-link type="info" :underline="false" @click="isRegister = true;clearData()">
+          <el-link style="color: black;" type="info" :underline="false" @click="isRegister = true;clearData()">
             注册 →
           </el-link>
         </el-form-item>
@@ -187,10 +187,9 @@ const clearData = () => {
 .login-page {
   height: 100vh;
   background-color: #fff;
-
+  background: url("@/assets/background.jpeg") no-repeat center / cover;
   .bg {
-    background: url("@/assets/logo2.png") no-repeat 60% center / 240px auto,
-      url("@/assets/login_bg.jpg") no-repeat center / cover;
+    background: url("@/assets/MyLogo.png") no-repeat 60% center / 200px auto;
     border-radius: 0 20px 20px 0;
   }
 

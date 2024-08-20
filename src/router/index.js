@@ -11,12 +11,13 @@ import MovieRoom from "../views/movie/MovieRoom.vue";
 import UserCenter from "../views/user/UserCenter.vue";
 import UserFavorite from "../views/user/UserFavorite.vue";
 import UserHistory from "../views/user/UserHistory.vue";
-
+import ContackUs from "../views/user/ContackUs.vue";
 
 //定义路由关系
 const routes = [
     {path: '/api/register', component: LoginVue},
     {path: '/' , component: Layout,children:[
+        {path: '/', component: ContackUs},
         {path: '/api/movies/main', component: MovieMain},
         {path: '/api/movies', component: MovieCategory},
         {path: '/api/movieHot', component: MovieHot},
